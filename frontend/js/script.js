@@ -394,6 +394,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* ---- TESTIMONIAL SLIDER LOGIC ---- */
+  const testiTrack = document.getElementById('testiTrack');
+  if (testiTrack) {
+    let index = 0;
+    const cards = testiTrack.children;
+    setInterval(() => {
+      index = (index + 1) % cards.length;
+      const offset = index * - (cards[0].offsetWidth + 32); // card width + gap
+      testiTrack.style.transform = `translateX(${offset}px)`;
+    }, 5000);
+  }
+
+  /* ---- PROGRESS BAR ANIMATION ---- */
+  const progressBars = document.querySelectorAll('.progress-bar');
+  if (progressBars.length) {
+    const progObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const bar = entry.target;
+          const width = bar.style.width;
+          bar.style.width = '0';
+          setTimeout(() => { bar.style.width = width; }, 100);
+          progObserver.unobserve(bar);
+        }
+      });
+    }, { threshold: 0.5 });
+    progressBars.forEach(bar => progObserver.observe(bar));
+  }
+
 });
 
 /* ---- STYLES INJECTION ---- */
