@@ -338,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.showToast(data.message, 'success');
           profileModal.classList.add('hidden');
           window.updateDashboardUI(data.user);
+        } else { window.showToast(data.error, 'error'); }
       } catch (err) { window.showToast('Network error', 'error'); } finally { btn.disabled = false; }
     });
   }
