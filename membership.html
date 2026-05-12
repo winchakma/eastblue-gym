@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Membership | East Blue Gym</title>
+  <link rel="stylesheet" href="css/style.css?v=2026"/>
+  <script>
+    // Tailwind (utilities only) — keep existing CSS intact
+    tailwind = { config: { corePlugins: { preflight: false } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Toggle */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 56px;
+    }
+    .toggle-label {
+      font-family: var(--font-sub);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .toggle-label.active { color: var(--white); }
+    .toggle-switch {
+      position: relative;
+      width: 52px; height: 28px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 28px;
+      cursor: pointer;
+      transition: var(--trans);
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      left: 4px; top: 4px;
+      background: var(--yellow);
+      border-radius: 50%;
+      transition: var(--trans);
+    }
+    input:checked + .toggle-slider { background: var(--yellow); }
+    input:checked + .toggle-slider::before {
+      transform: translateX(24px);
+      background: var(--black);
+    }
+    .save-badge {
+      background: var(--yellow);
+      color: var(--black);
+      font-family: var(--font-sub);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+    /* Pricing cards */
+    .pricing-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      display: flex;
+      flex-direction: column;
+      transition: var(--trans);
+      position: relative;
+    }
+    .pricing-card:hover {
+      border-color: var(--yellow);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .pricing-card.featured {
+      border-color: var(--yellow);
+      background: linear-gradient(145deg, #1e1e00 0%, var(--card) 100%);
+    }
+    .popular-badge {
+      position: absolute;
+      top: -14px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--yellow);
+      color: var(--black);
+      font-family: var(--font-sub);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 18px;
+      border-radius: 50px;
+      white-space: nowrap;
+    }
+    .plan-name {
+      font-family: var(--font-head);
+      font-size: 28px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .plan-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .plan-price {
+      margin-bottom: 32px;
+    }
+    .price-amount {
+      font-family: var(--font-head);
+      font-size: 58px;
+      line-height: 1;
+      letter-spacing: 1px;
+      color: var(--yellow);
+    }
+    .price-amount sup {
+      font-family: var(--font-sub);
+      font-size: 22px;
+      vertical-align: super;
+      color: var(--yellow);
+    }
+    .price-period {
+      font-size: 13px;
+      color: var(--muted);
+      font-family: var(--font-sub);
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    .price-annual { display: none; }
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+      flex: 1;
+    }
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: #ccc;
+    }
+    .plan-features li::before {
+      content: '✓';
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px; height: 20px;
+      background: var(--yellow);
+      color: var(--black);
+      font-size: 11px;
+      font-weight: 900;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .plan-features li.disabled { color: var(--muted2); }
+    .plan-features li.disabled::before {
+      content: '✕';
+      background: var(--border);
+      color: var(--muted2);
+    }
+    /* FAQ Accordion */
+    .accordion-item {
+      border-bottom: 1px solid var(--border);
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 0;
+      cursor: pointer;
+      font-family: var(--font-sub);
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .accordion-header:hover { color: var(--yellow); }
+    .accordion-icon {
+      font-size: 20px;
+      color: var(--yellow);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .accordion-item.open .accordion-icon { transform: rotate(45deg); }
+    .accordion-body {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+    }
+    .accordion-item.open .accordion-body {
+      max-height: 300px;
+      padding-bottom: 22px;
+    }
+    /* Auth forms */
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 14px;
+      font-family: var(--font-sub);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: var(--trans);
+    }
+    .auth-tab.active {
+      color: var(--yellow);
+      border-bottom-color: var(--yellow);
+    }
+    .auth-form { display: none; flex-direction: column; gap: 16px; }
+    .auth-form.active { display: flex; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label {
+      font-family: var(--font-sub);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .form-input {
+      background: #222;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--white);
+      padding: 13px 16px;
+      font-size: 14px;
+      font-family: var(--font-body);
+      transition: var(--trans);
+      width: 100%;
+    }
+    .form-input:focus { border-color: var(--yellow); outline: none; }
+    .form-input::placeholder { color: var(--muted2); }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">EAST <span>BLUE</span></a>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="classes.html">Classes</a>
+      <a href="activity.html">Activity</a>
+      <a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a>
+      <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+      <a href="membership.html">Membership</a>
+      <a href="about.html">About</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="membership.html" class="btn-nav btn-nav-outline nav-auth-only">Sign In</a>
+      <a href="membership.html" class="btn-nav btn-nav-fill nav-auth-only">Start Free Trial</a>
+      
+      <div id="navProfileBtn" class="nav-profile-link nav-dashboard-link hidden" style="display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;">
+        <span id="nav-greeting" class="text-xs font-bold text-yellow-400 hidden lg:inline">Elite Member</span>
+        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow); object-fit: cover;">
+        
+        <div id="navDropdown" class="nav-dropdown">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Settings</a>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  
+
+  <!-- GLOBAL AUTH MODAL -->
+  <div id="authModal" class="modal-overlay hidden">
+    <div class="modal-content glass auth-modal-inner">
+      <button class="modal-close" id="closeAuthModal">&times;</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginFormModal" class="auth-form active ajax-form" action="/api/auth/login" method="POST">
+        <h2 class="modal-title">WELCOME <span>BACK</span></h2>
+        <p class="modal-subtitle">Enter your elite credentials to continue.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Sign In</button>
+        <p class="auth-switch-text">Don't have an account? <a href="#" onclick="switchTab('register')">Join the Elite</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerFormModal" class="auth-form ajax-form" action="/api/auth/register" method="POST">
+        <h2 class="modal-title">START <span>A TRIAL</span></h2>
+        <p class="modal-subtitle">Join the East Blue community today.</p>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" name="firstName" class="form-input" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Create Account</button>
+        <p class="auth-switch-text">Already a member? <a href="#" onclick="switchTab('login')">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="classes.html">Classes</a>
+    <a href="activity.html">Activity</a>
+    <a href="dashboard.html" class="nav-dashboard-link">Dashboard</a>
+    <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+    <a href="membership.html">Membership</a>
+    <a href="about.html">About</a>
+  </div>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="page-hero-bg">
+      <img src="https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=1600&h=700&fit=crop" alt="Membership"/>
+    </div>
+    <div class="page-hero-content">
+      <span class="hero-tag">Join Today</span>
+      <h1 style="font-family:var(--font-head);font-size:clamp(52px,8vw,100px);line-height:0.9;text-transform:uppercase;letter-spacing:2px;">MEMBERSHIP <span style="color:var(--yellow);">PLANS</span></h1>
+      <p style="font-size:16px;color:rgba(245,245,245,0.7);margin-top:14px;max-width:500px;">Choose the plan that fits your goals. Cancel anytime. First week free — no commitment.</p>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-full" id="trial">
+    <div class="px-4 sm:px-6 lg:px-10" style="max-width:1100px;margin:0 auto;">
+      <div class="text-center reveal" style="margin-bottom:20px;">
+        <span class="section-label">Pricing</span>
+        <h2 class="section-title">CHOOSE YOUR <span>PLAN</span></h2>
+        <div class="divider" style="margin:18px auto;"></div>
+      </div>
+
+      <!-- Toggle -->
+      <div class="toggle-wrap reveal">
+        <span class="toggle-label active">Monthly</span>
+        <label class="toggle-switch">
+          <input type="checkbox" class="plan-toggle"/>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">Annual</span>
+        <span class="save-badge">Save 20%</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" style="align-items:stretch;">
+                <!-- Free Trial -->
+        <div class="pricing-card reveal">
+          <div class="plan-name" style="color:var(--muted);">Free Trial</div>
+          <div class="plan-desc">Experience the power of East Blue Gym for one full week.</div>
+          <div class="plan-price">
+            <div class="price-monthly">
+              <div class="price-amount"><sup>$</sup>0</div>
+              <div class="price-period">for 7 days</div>
+            </div>
+            <div class="price-annual" style="opacity:0;">
+              <div class="price-amount"><sup>$</sup>0</div>
+              <div class="price-period">hidden</div>
+            </div>
+          </div>
+          <ul class="plan-features">
+            <li>7 days of gym access</li>
+            <li>1 complimentary class</li>
+            <li>Basic app access</li>
+            <li class="disabled">Unlimited classes</li>
+            <li class="disabled">Nutrition plan</li>
+            <li class="disabled">Priority booking</li>
+            <li class="disabled">Personal trainer sessions</li>
+          </ul>
+          <a href="#signin" class="btn btn-outline-white plan-select-btn" data-plan="free" style="text-align:center;justify-content:center;">Try Now</a>
+        </div>
+
+        <!-- Starter -->
+        <div class="pricing-card reveal">
+          <div class="plan-name">Starter</div>
+          <div class="plan-desc">Perfect for beginners getting started on their fitness journey.</div>
+          <div class="plan-price">
+            <div class="price-monthly">
+              <div class="price-amount"><sup>$</sup>49</div>
+              <div class="price-period">per month</div>
+            </div>
+            <div class="price-annual">
+              <div class="price-amount"><sup>$</sup>39</div>
+              <div class="price-period">per month, billed annually</div>
+            </div>
+          </div>
+          <ul class="plan-features">
+            <li>Access to 1 studio location</li>
+            <li>8 classes per month</li>
+            <li>Basic app access</li>
+            <li>Community forum access</li>
+            <li class="disabled">Unlimited classes</li>
+            <li class="disabled">Nutrition plan</li>
+            <li class="disabled">Personal trainer sessions</li>
+          </ul>
+          <a href="#signin" class="btn btn-outline-yellow plan-select-btn" data-plan="starter" style="text-align:center;justify-content:center;">Get Started</a>
+        </div>
+
+        <!-- Pro (featured) -->
+        <div class="pricing-card featured reveal reveal-delay-1">
+          <div class="popular-badge">Most Popular</div>
+          <div class="plan-name" style="color:var(--yellow);">Pro</div>
+          <div class="plan-desc">The full East Blue experience. Unlimited access to everything.</div>
+          <div class="plan-price">
+            <div class="price-monthly">
+              <div class="price-amount"><sup>$</sup>89</div>
+              <div class="price-period">per month</div>
+            </div>
+            <div class="price-annual">
+              <div class="price-amount"><sup>$</sup>71</div>
+              <div class="price-period">per month, billed annually</div>
+            </div>
+          </div>
+          <ul class="plan-features">
+            <li>Access to all studio locations</li>
+            <li>Unlimited classes per month</li>
+            <li>Full app + LionHeart tracker</li>
+            <li>Community + challenges access</li>
+            <li>Nutrition plan included</li>
+            <li>Priority class booking</li>
+            <li class="disabled">1-on-1 trainer sessions</li>
+          </ul>
+          <a href="#signin" class="btn btn-yellow plan-select-btn" data-plan="pro" style="text-align:center;justify-content:center;">Start Free Week</a>
+        </div>
+
+        <!-- Elite -->
+        <div class="pricing-card reveal reveal-delay-2">
+          <div class="plan-name">Elite</div>
+          <div class="plan-desc">For dedicated athletes who want the ultimate personal experience.</div>
+          <div class="plan-price">
+            <div class="price-monthly">
+              <div class="price-amount"><sup>$</sup>149</div>
+              <div class="price-period">per month</div>
+            </div>
+            <div class="price-annual">
+              <div class="price-amount"><sup>$</sup>119</div>
+              <div class="price-period">per month, billed annually</div>
+            </div>
+          </div>
+          <ul class="plan-features">
+            <li>Everything in Pro</li>
+            <li>4 personal trainer sessions/month</li>
+            <li>Custom workout programming</li>
+            <li>1-on-1 nutrition coaching</li>
+            <li>VIP challenge access</li>
+            <li>Guest passes (2/month)</li>
+            <li>Dedicated account manager</li>
+          </ul>
+          <a href="#signin" class="btn btn-outline-yellow plan-select-btn" data-plan="elite" style="text-align:center;justify-content:center;">Get Elite</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGN IN / REGISTER -->
+  <div class="section-full" style="background:var(--dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);" id="signin">
+    <div class="px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center" style="max-width:1100px;margin:0 auto;">
+      <div class="reveal">
+        <span class="section-label">Your Account</span>
+        <h2 class="section-title">SIGN IN OR <span>JOIN US</span></h2>
+        <div class="divider"></div>
+        <p class="section-subtitle">Access your bookings, track your progress, manage your membership, and connect with the East Blue community.</p>
+        <div style="margin-top:36px;display:flex;flex-direction:column;gap:16px;">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:36px;height:36px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--black);font-weight:700;flex-shrink:0;">1</div>
+            <span style="font-size:14px;color:#ccc;">Create your account or sign in</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:36px;height:36px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--black);font-weight:700;flex-shrink:0;">2</div>
+            <span style="font-size:14px;color:#ccc;">Choose your membership plan</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="width:36px;height:36px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--black);font-weight:700;flex-shrink:0;">3</div>
+            <span style="font-size:14px;color:#ccc;">Book your first class and start training</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-1" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;">
+        <div class="auth-tabs">
+          <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
+          <div class="auth-tab" onclick="switchTab('register')">Register</div>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth-form active ajax-form" id="loginForm" action="/api/auth/login" method="POST">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" type="email" name="email" placeholder="you@example.com" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" name="password" placeholder="••••••••" required/>
+          </div>
+          <div style="text-align:right;margin-top:-6px;">
+            <a href="#" style="font-size:12px;color:var(--muted);font-family:var(--font-sub);letter-spacing:1px;">Forgot Password?</a>
+          </div>
+          <button type="submit" class="btn btn-yellow" style="width:100%;justify-content:center;margin-top:8px;">Sign In</button>
+          <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:8px;">Don't have an account? <a href="#" onclick="switchTab('register')" style="color:var(--yellow);">Register free</a></p>
+        </form>
+
+        <!-- Register Form -->
+        <form class="auth-form ajax-form" id="registerForm" action="/api/auth/register" method="POST">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input class="form-input" type="text" name="firstName" placeholder="John" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input class="form-input" type="text" name="lastName" placeholder="Doe" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" type="email" name="email" placeholder="you@example.com" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" name="password" placeholder="Min 8 characters" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Membership Plan</label>
+                        <select class="form-input" name="plan">
+              <option value="free">Free Trial - 7 Days</option>
+              <option value="starter">Starter - $49/month</option>
+              <option value="pro" selected>Pro - $89/month</option>
+              <option value="elite">Elite - $149/month</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-yellow" style="width:100%;justify-content:center;">Create Account</button>
+          <p style="text-align:center;font-size:11px;color:var(--muted2);margin-top:8px;">By registering, you agree to our <a href="support.html#terms" style="color:var(--yellow);">Terms</a> and <a href="support.html#privacy" style="color:var(--yellow);">Privacy Policy</a>.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="section-full">
+    <div class="px-4 sm:px-6 lg:px-10" style="max-width:800px;margin:0 auto;">
+      <div class="text-center reveal" style="margin-bottom:48px;">
+        <span class="section-label">Questions</span>
+        <h2 class="section-title">FAQ</h2>
+      </div>
+
+      <div class="reveal">
+        <div class="accordion-item">
+          <div class="accordion-header">Can I try before I buy?<span class="accordion-icon">+</span></div>
+          <div class="accordion-body">Yes! Every new member gets their first week completely free — no credit card required. Just create an account, pick a plan, and start training.</div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">Can I cancel anytime?<span class="accordion-icon">+</span></div>
+          <div class="accordion-body">Absolutely. Monthly memberships can be cancelled at any time with no fees. Annual memberships include a 30-day cancellation window from the start date.</div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">How many locations can I access?<span class="accordion-icon">+</span></div>
+          <div class="accordion-body">Starter members get access to 1 home location. Pro and Elite members get access to all East Blue studio locations worldwide.</div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">Can I upgrade or downgrade my plan?<span class="accordion-icon">+</span></div>
+          <div class="accordion-body">Yes, you can change your plan at any time through your account dashboard. Changes take effect at the start of your next billing cycle.</div>
+        </div>
+        <div class="accordion-item">
+          <div class="accordion-header">Is there a family or corporate plan?<span class="accordion-icon">+</span></div>
+          <div class="accordion-body">Yes! We offer discounted family bundles and corporate wellness plans for teams of 5 or more. Contact us directly for custom pricing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand reveal">
+        <a href="index.html" style="text-decoration:none; color:inherit;"><h3>EAST <span>BLUE</span></h3></a>
+        <p>Redefining fitness through high-performance training and elite community experiences. Join the movement today.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social-btn" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-mailing reveal reveal-delay-1">
+        <h4>Membership</h4>
+        <h3>Unlock <span>Access</span></h3>
+        <p>Be the first to know about special offers, new workouts & upcoming events.</p>
+        <a href="membership.html" class="btn btn-yellow" style="padding:12px 24px; font-size:11px;">Join The Elite</a>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-2">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="classes.html">Classes</a></li>
+          <li><a href="activity.html">Activity</a></li>
+          <li><a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-3">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="support.html#faq">Help Center</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="support.html#privacy">Privacy Policy</a></li>
+          <li><a href="support.html#terms">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 East Blue Gym. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="support.html#terms">Terms & Disclosures</a>
+        <a href="support.html#privacy">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js?v=2026"></script>
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => {
+        t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+      });
+      document.getElementById('loginForm').classList.toggle('active', tab === 'login');
+      document.getElementById('registerForm').classList.toggle('active', tab === 'register');
+    }
+
+    // Auto-switch to register when plan is clicked
+    document.querySelectorAll('.plan-select-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab('register');
+        const plan = btn.dataset.plan;
+        if (plan) {
+            document.querySelector('select[name="plan"]').value = plan;
+        }
+      });
+    });
+  </script>
+  <link rel="stylesheet" href="css/chatbot.css">
+  <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

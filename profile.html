@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Management | East Blue Gym Elite</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css?v=2026">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,600;0,700;0,800;1,700;1,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #050505;
+      --card-bg: #0d0d0d;
+      --border-color: #1a1a1a;
+      --text-muted: #666;
+    }
+    body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; }
+    .profile-container { max-width: 1200px; margin: 120px auto 60px; padding: 0 20px; }
+    .sidebar-link { 
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px; 
+      color: var(--text-muted); font-size: 14px; transition: all 0.3s; border-radius: 12px;
+    }
+    .sidebar-link:hover { background: #111; color: white; }
+    .sidebar-link.active { background: #1a1a1a; color: var(--yellow); font-weight: 600; }
+    .account-card { 
+      background: var(--card-bg); border: 1px solid var(--border-color); 
+      border-radius: 20px; padding: 24px; transition: transform 0.3s;
+    }
+    .account-card:hover { border-color: #333; }
+    .edit-btn { color: var(--yellow); font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+    .edit-btn:hover { text-decoration: underline; }
+    .data-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 4px; }
+    .data-value { font-size: 15px; color: #eee; }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR (Synchronized) -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">EAST <span>BLUE</span></a>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="classes.html">Classes</a>
+      <a href="activity.html">Activity</a>
+      <a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a>
+      <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+      <a href="membership.html">Membership</a>
+      <a href="about.html">About</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="membership.html" class="btn-nav btn-nav-outline nav-auth-only">Sign In</a>
+      <a href="membership.html" class="btn-nav btn-nav-fill nav-auth-only">Start Free Trial</a>
+      
+      <div id="navProfileBtn" class="nav-profile-link nav-dashboard-link hidden" style="display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;">
+        <span id="nav-greeting" class="text-xs font-bold text-yellow-400 hidden lg:inline">Elite Member</span>
+        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow); object-fit: cover;">
+        
+        <div id="navDropdown" class="nav-dropdown">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Settings</a>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  
+
+  <!-- GLOBAL AUTH MODAL -->
+  <div id="authModal" class="modal-overlay hidden">
+    <div class="modal-content glass auth-modal-inner">
+      <button class="modal-close" id="closeAuthModal">&times;</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginFormModal" class="auth-form active ajax-form" action="/api/auth/login" method="POST">
+        <h2 class="modal-title">WELCOME <span>BACK</span></h2>
+        <p class="modal-subtitle">Enter your elite credentials to continue.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Sign In</button>
+        <p class="auth-switch-text">Don't have an account? <a href="#" onclick="switchTab('register')">Join the Elite</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerFormModal" class="auth-form ajax-form" action="/api/auth/register" method="POST">
+        <h2 class="modal-title">START <span>A TRIAL</span></h2>
+        <p class="modal-subtitle">Join the East Blue community today.</p>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" name="firstName" class="form-input" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Create Account</button>
+        <p class="auth-switch-text">Already a member? <a href="#" onclick="switchTab('login')">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  
+
+  <main class="profile-container">
+    <h1 class="text-3xl font-bold italic uppercase mb-8 tracking-tighter">Manage My <span class="text-yellow-400">Account</span></h1>
+    
+    <div class="flex flex-col lg:flex-row gap-8">
+      
+      <!-- SIDEBAR -->
+      <aside class="w-full lg:w-64 flex flex-col gap-2">
+        <div class="mb-4">
+          <p class="text-[10px] text-[#444] uppercase font-bold tracking-widest px-4 mb-2">Account Management</p>
+          <a href="profile.html" class="sidebar-link active">Manage My Account</a>
+          <a href="#" onclick="document.getElementById('btnOpenSettings').click()" class="sidebar-link">My Profile</a>
+          <a href="#" class="sidebar-link">Payment Options</a>
+          <a href="#" class="sidebar-link">East Blue Wallet</a>
+        </div>
+        <div class="mb-4">
+          <p class="text-[10px] text-[#444] uppercase font-bold tracking-widest px-4 mb-2">My Orders</p>
+          <a href="#" class="sidebar-link">Recent Orders</a>
+          <a href="#" class="sidebar-link">My Returns</a>
+        </div>
+        <div>
+          <p class="text-[10px] text-[#444] uppercase font-bold tracking-widest px-4 mb-2">My Reviews</p>
+          <a href="#" class="sidebar-link">Pending Reviews</a>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <section class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        
+        <!-- Personal Profile Card -->
+        <div class="account-card">
+          <div class="flex justify-between items-center mb-6">
+            <h4 class="text-sm font-bold uppercase tracking-widest">Personal Profile</h4>
+            <span class="edit-btn" onclick="document.getElementById('btnOpenSettings').click()">Edit</span>
+          </div>
+          <div class="flex flex-col gap-4">
+            <div>
+              <p class="data-label">Full Name</p>
+              <p id="profile-name-display" class="data-value">Loading...</p>
+            </div>
+            <div>
+              <p class="data-label">Email Address</p>
+              <p id="profile-email-display" class="data-value">Loading...</p>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <input type="checkbox" checked disabled class="accent-yellow-400">
+              <span class="text-[10px] text-[#555] uppercase font-bold">Receive Marketing Emails</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Membership Card -->
+        <div class="account-card">
+          <div class="flex justify-between items-center mb-6">
+            <h4 class="text-sm font-bold uppercase tracking-widest">Membership Plan</h4>
+            <span class="edit-btn">Upgrade</span>
+          </div>
+          <div class="flex flex-col gap-4">
+             <div class="flex items-center gap-4">
+               <div class="w-12 h-12 bg-yellow-400/10 rounded-xl flex items-center justify-center">
+                 <svg width="24" height="24" fill="var(--yellow)" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2z"></path></svg>
+               </div>
+               <div>
+                 <p id="membership-tier-display" class="text-lg font-bold italic">ELITE ANNUAL</p>
+                 <p class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Active Subscription</p>
+               </div>
+             </div>
+             <p class="text-xs text-[#555] leading-relaxed">Your elite access includes unlimited classes, 1-on-1 coaching, and priority booking at all East Blue locations.</p>
+          </div>
+        </div>
+
+        <!-- Recent Activity Table -->
+        <div class="account-card md:col-span-2">
+          <h4 class="text-sm font-bold uppercase tracking-widest mb-6">Recent Activity</h4>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-[#1a1a1a]">
+                  <th class="py-4 text-[10px] text-[#444] uppercase font-bold tracking-widest">Date</th>
+                  <th class="py-4 text-[10px] text-[#444] uppercase font-bold tracking-widest">Activity</th>
+                  <th class="py-4 text-[10px] text-[#444] uppercase font-bold tracking-widest">Location</th>
+                  <th class="py-4 text-[10px] text-[#444] uppercase font-bold tracking-widest text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody class="text-xs">
+                <tr class="border-b border-[#1a1a1a] hover:bg-[#111]">
+                  <td class="py-4 text-[#888]">May 10, 2026</td>
+                  <td class="py-4 font-bold italic">High Intensity Boxing</td>
+                  <td class="py-4 text-[#888]">East Blue Downtown</td>
+                  <td class="py-4 text-green-500 font-bold text-right">Completed</td>
+                </tr>
+                <tr class="border-b border-[#1a1a1a] hover:bg-[#111]">
+                  <td class="py-4 text-[#888]">May 08, 2026</td>
+                  <td class="py-4 font-bold italic">Elite Weightlifting</td>
+                  <td class="py-4 text-[#888]">East Blue Marina</td>
+                  <td class="py-4 text-green-500 font-bold text-right">Completed</td>
+                </tr>
+                <tr class="hover:bg-[#111]">
+                  <td class="py-4 text-[#888]">May 05, 2026</td>
+                  <td class="py-4 font-bold italic">Morning Yoga Flow</td>
+                  <td class="py-4 text-[#888]">East Blue Rooftop</td>
+                  <td class="py-4 text-green-500 font-bold text-right">Completed</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- ELITE CONTROL CENTER (MODAL) - Hidden by default -->
+  <div id="profileModal" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="bg-[#0a0a0a] border border-[#222] rounded-3xl w-full max-w-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
+      <div class="p-6 border-b border-[#1a1a1a] flex justify-between items-center bg-[#0d0d0d]">
+        <h3 class="text-xl font-bold tracking-widest italic uppercase">Elite <span class="text-yellow-400">Control Center</span></h3>
+        <button id="btnCloseModal" class="text-[#555] hover:text-white transition-all">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="p-8">
+        <form id="profileUpdateForm" class="ajax-form grid grid-cols-1 md:grid-cols-2 gap-8" action="/api/user/profile/update" method="POST" enctype="multipart/form-data">
+          <div class="flex flex-col gap-6">
+            <div class="flex items-center gap-4">
+              <img id="modal-avatar-preview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-16 h-16 rounded-xl border border-[#222]">
+              <input type="file" name="profilePictureFile" id="edit-avatar-file" class="text-xs text-[#555]">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" name="username" id="edit-username" class="form-input w-full">
+            </div>
+          </div>
+          <div class="flex flex-col gap-6">
+            <div class="form-group">
+              <label class="form-label">Nickname</label>
+              <input type="text" name="nickname" id="edit-nickname" class="form-input w-full">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Secondary Email</label>
+              <input type="email" name="secondaryEmail" id="edit-secondary" class="form-input w-full">
+            </div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="form-label">Bio</label>
+            <textarea name="bio" id="edit-bio" class="form-input w-full h-24"></textarea>
+          </div>
+          <button type="submit" class="btn btn-yellow md:col-span-2">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js?v=2026"></script>
+  <script>
+    // Specific UI updates for this page
+    document.addEventListener('DOMContentLoaded', () => {
+      const originalUpdateUI = window.updateDashboardUI;
+      window.updateDashboardUI = function(user) {
+        originalUpdateUI(user);
+        if (document.getElementById('profile-name-display')) {
+          document.getElementById('profile-name-display').textContent = user.username;
+          document.getElementById('profile-email-display').textContent = user.email;
+          document.getElementById('membership-tier-display').textContent = user.membershipType || 'ELITE ANNUAL';
+        }
+      };
+    });
+  </script>
+<link rel="stylesheet" href="css/chatbot.css">
+<script src="js/chatbot.js"></script>
+</body>
+</html>
+
+

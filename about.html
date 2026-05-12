@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About | East Blue Gym</title>
+  <link rel="stylesheet" href="css/style.css?v=2026"/>
+  <script>
+    // Tailwind (utilities only) — keep existing CSS intact
+    tailwind = { config: { corePlugins: { preflight: false } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .value-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      transition: var(--trans);
+    }
+    .value-card:hover { border-color: var(--yellow); }
+    .value-icon {
+      font-family: var(--font-head);
+      font-size: 48px;
+      color: var(--yellow);
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+    .value-card h3 {
+      font-family: var(--font-sub);
+      font-size: 20px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .value-card p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+    /* Awards strip */
+    .awards-strip {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 40px;
+    }
+    .award-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+    }
+    .award-icon { font-size: 28px; }
+    .award-name { font-family: var(--font-sub); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .award-year { font-size: 12px; color: var(--muted); }
+    /* Team card */
+    .team-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--trans);
+    }
+    .team-card:hover { border-color: var(--yellow); transform: translateY(-4px); }
+    .team-img { height: 280px; overflow: hidden; }
+    .team-img img { height: 100%; transition: transform 0.4s; }
+    .team-card:hover .team-img img { transform: scale(1.05); }
+    .team-body { padding: 22px; }
+    .team-body h3 { font-family: var(--font-sub); font-size: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    .team-role { font-size: 13px; color: var(--yellow); font-family: var(--font-sub); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .team-body p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    /* Contact form */
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .form-label { font-family: var(--font-sub); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+    .form-input { background: #222; border: 1px solid var(--border); border-radius: var(--radius); color: var(--white); padding: 13px 16px; font-size: 14px; font-family: var(--font-body); transition: var(--trans); width: 100%; }
+    .form-input:focus { border-color: var(--yellow); outline: none; }
+    .form-input::placeholder { color: var(--muted2); }
+    textarea.form-input { resize: vertical; min-height: 120px; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">EAST <span>BLUE</span></a>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="classes.html">Classes</a>
+      <a href="activity.html">Activity</a>
+      <a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a>
+      <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+      <a href="membership.html">Membership</a>
+      <a href="about.html">About</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="membership.html" class="btn-nav btn-nav-outline nav-auth-only">Sign In</a>
+      <a href="membership.html" class="btn-nav btn-nav-fill nav-auth-only">Start Free Trial</a>
+      
+      <div id="navProfileBtn" class="nav-profile-link nav-dashboard-link hidden" style="display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;">
+        <span id="nav-greeting" class="text-xs font-bold text-yellow-400 hidden lg:inline">Elite Member</span>
+        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow); object-fit: cover;">
+        
+        <div id="navDropdown" class="nav-dropdown">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Settings</a>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  
+
+  <!-- GLOBAL AUTH MODAL -->
+  <div id="authModal" class="modal-overlay hidden">
+    <div class="modal-content glass auth-modal-inner">
+      <button class="modal-close" id="closeAuthModal">&times;</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginFormModal" class="auth-form active ajax-form" action="/api/auth/login" method="POST">
+        <h2 class="modal-title">WELCOME <span>BACK</span></h2>
+        <p class="modal-subtitle">Enter your elite credentials to continue.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Sign In</button>
+        <p class="auth-switch-text">Don't have an account? <a href="#" onclick="switchTab('register')">Join the Elite</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerFormModal" class="auth-form ajax-form" action="/api/auth/register" method="POST">
+        <h2 class="modal-title">START <span>A TRIAL</span></h2>
+        <p class="modal-subtitle">Join the East Blue community today.</p>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" name="firstName" class="form-input" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Create Account</button>
+        <p class="auth-switch-text">Already a member? <a href="#" onclick="switchTab('login')">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="classes.html">Classes</a>
+    <a href="activity.html">Activity</a>
+            <a href="dashboard.html" class="nav-dashboard-link">Dashboard</a>
+    <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+    <a href="membership.html">Membership</a>
+    <a href="about.html">About</a>
+  </div>
+
+  <div class="page-hero" style="min-height:60vh;align-items:center;">
+    <div class="page-hero-bg">
+      <img src="https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=1600&h=700&fit=crop" alt="About"/>
+    </div>
+    <div class="page-hero-content">
+      <span class="hero-tag">Our Story</span>
+      <h1 style="font-family:var(--font-head);font-size:clamp(52px,8vw,100px);line-height:0.9;text-transform:uppercase;letter-spacing:2px;">ABOUT <span style="color:var(--yellow);">EAST BLUE</span></h1>
+      <p style="font-size:16px;color:rgba(245,245,245,0.7);margin-top:14px;max-width:560px;">We believe fitness is for everyone. Our mission is to make life-changing training accessible, inclusive, and genuinely fun.</p>
+    </div>
+  </div>
+
+  <div class="section-full" style="background:var(--dark);border-bottom:1px solid var(--border);">
+    <div class="px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center" style="max-width:1400px;margin:0 auto;">
+      <div class="reveal">
+        <span class="section-label">Who We Are</span>
+        <h2 class="section-title">BORN FROM A<br/><span>PASSION</span></h2>
+        <div class="divider"></div>
+        <p style="font-size:15px;color:#ccc;line-height:1.8;margin-bottom:20px;">East Blue was founded in 2018 by a group of athletes, coaches, and community builders who believed that the best workouts happen together. Tired of impersonal gym experiences, we set out to create something different — a place where every member is known by name, every session is crafted with purpose, and every result is celebrated.</p>
+        <p style="font-size:15px;color:#ccc;line-height:1.8;margin-bottom:36px;">What started as a single studio has grown into a global network of passionate fitness communities. Our science-backed methods, world-class coaching, and unwavering community spirit have made East Blue the fastest-growing group fitness brand in the world.</p>
+        <div class="awards-strip">
+          <div class="award-item">
+            <div class="award-icon">🏆</div>
+            <div>
+              <div class="award-name">#1 Gym Brand</div>
+              <div class="award-year">Men's Journal 2024</div>
+            </div>
+          </div>
+          <div class="award-item">
+            <div class="award-icon">⭐</div>
+            <div>
+              <div class="award-name">Best Group Fitness</div>
+              <div class="award-year">Canstar Blue 2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal reveal-delay-2" style="border-radius:10px;overflow:hidden;height:520px;">
+        <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=700&h=700&fit=crop" alt="Story" style="height:100%;"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <div class="stat-num" data-target="2018">0</div>
+      <div class="stat-label">Founded</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="42" data-suffix=" Countries">0 Countries</div>
+      <div class="stat-label">Global Reach</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="320" data-suffix="+">0+</div>
+      <div class="stat-label">Studio Locations</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="3.4" data-suffix="M+">0M+</div>
+      <div class="stat-label">Members Worldwide</div>
+    </div>
+  </div>
+
+  <div class="section-full">
+    <div class="px-4 sm:px-6 lg:px-10" style="max-width:1400px;margin:0 auto;">
+      <div class="text-center reveal" style="margin-bottom:56px;">
+        <span class="section-label">What We Stand For</span>
+        <h2 class="section-title">OUR <span>VALUES</span></h2>
+        <div class="divider" style="margin:18px auto;"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="value-card reveal">
+          <div class="value-icon">01</div>
+          <h3>Community First</h3>
+          <p>Every decision we make starts with our members. We build environments where people support, push, and celebrate each other — not just compete.</p>
+        </div>
+        <div class="value-card reveal reveal-delay-1">
+          <div class="value-icon">02</div>
+          <h3>Science-Backed</h3>
+          <p>Our programming is rooted in exercise science, physiology, and decades of coaching experience. We don't follow trends — we set them.</p>
+        </div>
+        <div class="value-card reveal reveal-delay-2">
+          <div class="value-icon">03</div>
+          <h3>For Every Body</h3>
+          <p>Fitness is not one-size-fits-all. Our classes are designed to be scaled and modified for every fitness level, age, and background.</p>
+        </div>
+        <div class="value-card reveal">
+          <div class="value-icon">04</div>
+          <h3>Radical Transparency</h3>
+          <p>We're honest about our pricing, our methods, and our results. No gimmicks, no hidden fees, no miracle promises.</p>
+        </div>
+        <div class="value-card reveal reveal-delay-1">
+          <div class="value-icon">05</div>
+          <h3>Continuous Innovation</h3>
+          <p>We invest heavily in R&D to ensure every class, every challenge, and every tool we provide is best-in-class. We never stop improving.</p>
+        </div>
+        <div class="value-card reveal reveal-delay-2">
+          <div class="value-icon">06</div>
+          <h3>Global Impact</h3>
+          <p>From local communities to global challenges, we believe that healthier people build healthier societies. Our mission is bigger than just fitness.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-full" style="background:var(--dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="px-4 sm:px-6 lg:px-10" style="max-width:1400px;margin:0 auto;">
+      <div class="section-header reveal">
+        <div>
+          <span class="section-label">The People Behind It</span>
+          <h2 class="section-title">LEADERSHIP <span>TEAM</span></h2>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="team-card reveal">
+          <div class="team-img">
+            <img src="https://images.unsplash.com/photo-1560250097-0dc05ae-4c08c?w=400&h=350&fit=crop" alt="CEO"/>
+          </div>
+          <div class="team-body">
+            <h3>David Park</h3>
+            <div class="team-role">Founder & CEO</div>
+            <p>Former elite athlete and entrepreneur. Founded East Blue with a vision to democratise premium fitness.</p>
+          </div>
+        </div>
+        <div class="team-card reveal reveal-delay-1">
+          <div class="team-img">
+            <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=350&fit=crop" alt="COO"/>
+          </div>
+          <div class="team-body">
+            <h3>Rachel Torres</h3>
+            <div class="team-role">Chief Operations Officer</div>
+            <p>Operations veteran with 15 years in global fitness franchising and brand scaling.</p>
+          </div>
+        </div>
+        <div class="team-card reveal reveal-delay-2">
+          <div class="team-img">
+            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=350&fit=crop" alt="Head of Training"/>
+          </div>
+          <div class="team-body">
+            <h3>James Okafor</h3>
+            <div class="team-role">Head of Training</div>
+            <p>PhD in Exercise Science. Designed every East Blue workout protocol from the ground up.</p>
+          </div>
+        </div>
+        <div class="team-card reveal reveal-delay-3">
+          <div class="team-img">
+            <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=350&fit=crop" alt="Nutrition"/>
+          </div>
+          <div class="team-body">
+            <h3>Nina Patel</h3>
+            <div class="team-role">Head of Nutrition</div>
+            <p>Registered dietitian and author. Leads all nutrition planning, challenge meal plans, and research.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-full">
+    <div class="px-4 sm:px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-start" style="max-width:1100px;margin:0 auto;">
+      <div class="reveal">
+        <span class="section-label">Get In Touch</span>
+        <h2 class="section-title">CONTACT <span>US</span></h2>
+        <div class="divider"></div>
+        <p class="section-subtitle" style="margin-bottom:40px;">Questions about franchising, media, partnerships, or your membership? Our team is ready to help.</p>
+        <div style="display:flex;flex-direction:column;gap:24px;">
+          <div style="display:flex;align-items:flex-start;gap:16px;">
+            <div style="width:42px;height:42px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--black);font-size:16px;flex-shrink:0;">📍</div>
+            <div>
+              <div style="font-family:var(--font-sub);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Head Office</div>
+              <div style="font-size:14px;color:var(--muted);">123 East Blue Drive, Melbourne VIC 3000, Australia</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:16px;">
+            <div style="width:42px;height:42px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--black);font-size:16px;flex-shrink:0;">✉️</div>
+            <div>
+              <div style="font-family:var(--font-sub);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Email Us</div>
+              <div style="font-size:14px;color:var(--muted);">hello@eastblue.gym</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:16px;">
+            <div style="width:42px;height:42px;background:var(--yellow);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--black);font-size:16px;flex-shrink:0;">📞</div>
+            <div>
+              <div style="font-family:var(--font-sub);font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;">Call Us</div>
+              <div style="font-size:14px;color:var(--muted);">+61 3 9000 1234</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-1" style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;">
+        <form class="ajax-form" action="/api/contact" method="POST">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input class="form-input" type="text" name="name" placeholder="John Doe" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input class="form-input" type="email" name="email" placeholder="you@example.com" required/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select class="form-input" name="subject">
+              <option>General Enquiry</option>
+              <option>Membership Support</option>
+              <option>Franchise / Partnership</option>
+              <option>Media & Press</option>
+              <option>Careers</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-input" name="message" placeholder="Tell us how we can help..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-yellow" style="width:100%;justify-content:center;">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="newsletter-section reveal">
+    <h2>JOIN THE <span>MOVEMENT</span></h2>
+    <p>Sign up and unlock exclusive offers, new workouts, and East Blue events near you.</p>
+    <div class="newsletter-form">
+      <input type="email" id="newsletter-email" placeholder="Enter your email address"/>
+      <button id="newsletter-subscribe">Subscribe</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand reveal">
+        <a href="index.html" style="text-decoration:none; color:inherit;"><h3>EAST <span>BLUE</span></h3></a>
+        <p>Redefining fitness through high-performance training and elite community experiences. Join the movement today.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social-btn" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-mailing reveal reveal-delay-1">
+        <h4>Membership</h4>
+        <h3>Unlock <span>Access</span></h3>
+        <p>Be the first to know about special offers, new workouts & upcoming events.</p>
+        <a href="membership.html" class="btn btn-yellow" style="padding:12px 24px; font-size:11px;">Join The Elite</a>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-2">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="classes.html">Classes</a></li>
+          <li><a href="activity.html">Activity</a></li>
+          <li><a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-3">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="support.html#faq">Help Center</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="support.html#privacy">Privacy Policy</a></li>
+          <li><a href="support.html#terms">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 East Blue Gym. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="support.html#terms">Terms & Disclosures</a>
+        <a href="support.html#privacy">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js?v=2026"></script>
+
+  <script>
+    // 1. Handling the Contact Form
+    const contactForm = document.querySelector('.ajax-form');
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(contactForm);
+        const payload = Object.fromEntries(formData.entries());
+
+        try {
+          const response = await fetch(contactForm.action, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            alert('Your message has been sent to East Blue!');
+            contactForm.reset();
+          } else {
+            alert('Submission failed. Please check your connection.');
+          }
+        } catch (err) {
+          console.error('Server error:', err);
+          alert('Could not connect to the Node.js server.');
+        }
+      });
+    }
+
+    // 2. Handling the Newsletter
+    const subscribeBtn = document.getElementById('newsletter-subscribe');
+    const subscribeInput = document.getElementById('newsletter-email');
+
+    if (subscribeBtn && subscribeInput) {
+      subscribeBtn.addEventListener('click', async () => {
+        const email = subscribeInput.value;
+        if (!email) return alert('Please enter your email.');
+
+        try {
+          const response = await fetch('/api/newsletter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+          });
+
+          if (response.ok) {
+            alert('You are now part of the East Blue movement!');
+            subscribeInput.value = '';
+          } else {
+            alert('Subscription failed.');
+          }
+        } catch (err) {
+          console.error('Newsletter error:', err);
+        }
+      });
+    }
+  </script>
+  <link rel="stylesheet" href="css/chatbot.css">
+  <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Classes | East Blue Gym</title>
+  <link rel="stylesheet" href="css/style.css?v=2026"/>
+  <script>
+    // Tailwind (utilities only) — keep existing CSS intact
+    tailwind = { config: { corePlugins: { preflight: false } } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .filter-btn {
+      font-family: var(--font-sub);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 10px 24px;
+      border: 2px solid var(--border);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: var(--trans);
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--yellow);
+      color: var(--yellow);
+    }
+    .filter-btn.active {
+      background: var(--yellow);
+      color: var(--black);
+    }
+    /* Class Card */
+    .class-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--trans);
+    }
+    .class-card:hover {
+      border-color: var(--yellow);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .class-card-img {
+      height: 220px;
+      overflow: hidden;
+      position: relative;
+    }
+    .class-card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .class-card:hover .class-card-img img {
+      transform: scale(1.06);
+    }
+    .class-info {
+      padding: 22px;
+    }
+    .class-meta {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .class-meta span {
+      font-family: var(--font-sub);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .class-meta span strong {
+      color: var(--yellow);
+    }
+    .class-info h3 {
+      font-family: var(--font-sub);
+      font-size: 22px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .class-info p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
+    }
+    /* Schedule table */
+    .schedule-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .schedule-table th {
+      font-family: var(--font-sub);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .schedule-table td {
+      padding: 16px;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .schedule-table tr:hover td {
+      background: var(--card);
+    }
+    .schedule-table tr:last-child td {
+      border-bottom: none;
+    }
+    .intensity-badge {
+      display: inline-block;
+      font-family: var(--font-sub);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+    .intensity-high   { background: var(--red); color: #fff; }
+    .intensity-medium { background: var(--yellow); color: var(--black); }
+    .intensity-low    { background: #2a2a2a; color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">EAST <span>BLUE</span></a>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="classes.html">Classes</a>
+      <a href="activity.html">Activity</a>
+      <a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a>
+      <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+      <a href="membership.html">Membership</a>
+      <a href="about.html">About</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="membership.html" class="btn-nav btn-nav-outline nav-auth-only">Sign In</a>
+      <a href="membership.html" class="btn-nav btn-nav-fill nav-auth-only">Start Free Trial</a>
+      
+      <div id="navProfileBtn" class="nav-profile-link nav-dashboard-link hidden" style="display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;">
+        <span id="nav-greeting" class="text-xs font-bold text-yellow-400 hidden lg:inline">Elite Member</span>
+        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow); object-fit: cover;">
+        
+        <div id="navDropdown" class="nav-dropdown">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Settings</a>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  
+
+  <!-- GLOBAL AUTH MODAL -->
+  <div id="authModal" class="modal-overlay hidden">
+    <div class="modal-content glass auth-modal-inner">
+      <button class="modal-close" id="closeAuthModal">&times;</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginFormModal" class="auth-form active ajax-form" action="/api/auth/login" method="POST">
+        <h2 class="modal-title">WELCOME <span>BACK</span></h2>
+        <p class="modal-subtitle">Enter your elite credentials to continue.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Sign In</button>
+        <p class="auth-switch-text">Don't have an account? <a href="#" onclick="switchTab('register')">Join the Elite</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerFormModal" class="auth-form ajax-form" action="/api/auth/register" method="POST">
+        <h2 class="modal-title">START <span>A TRIAL</span></h2>
+        <p class="modal-subtitle">Join the East Blue community today.</p>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" name="firstName" class="form-input" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Create Account</button>
+        <p class="auth-switch-text">Already a member? <a href="#" onclick="switchTab('login')">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  
+  <div class="mobile-menu" id="mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="classes.html">Classes</a>
+    <a href="activity.html">Activity</a>
+            <a href="dashboard.html" class="nav-dashboard-link">Dashboard</a>
+    <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+    <a href="membership.html">Membership</a>
+    <a href="about.html">About</a>
+  </div>
+
+  <div class="page-hero">
+    <div class="page-hero-bg">
+      <img src="https://images.unsplash.com/photo-1594737625785-a6cbdabd333c?w=1600&h=700&fit=crop" alt="Classes"/>
+    </div>
+    <div class="page-hero-content">
+      <span class="hero-tag">Workouts</span>
+      <h1 style="font-family:var(--font-head);font-size:clamp(52px,8vw,100px);line-height:0.9;text-transform:uppercase;letter-spacing:2px;">OUR <span style="color:var(--yellow);">CLASSES</span></h1>
+      <p style="font-size:16px;color:rgba(245,245,245,0.7);margin-top:14px;max-width:500px;">Over 80 workout types. No two sessions are ever the same. For every body, every fitness level.</p>
+    </div>
+  </div>
+
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <span>Cardio</span><span class="dot">✦</span>
+      <span>Resistance</span><span class="dot">✦</span>
+      <span>Hybrid</span><span class="dot">✦</span>
+      <span>Recovery</span><span class="dot">✦</span>
+      <span>HIIT</span><span class="dot">✦</span>
+      <span>Functional</span><span class="dot">✦</span>
+      <span>Circuit</span><span class="dot">✦</span>
+      <span>Yoga</span><span class="dot">✦</span>
+      <span>Cardio</span><span class="dot">✦</span>
+      <span>Resistance</span><span class="dot">✦</span>
+      <span>Hybrid</span><span class="dot">✦</span>
+      <span>Recovery</span><span class="dot">✦</span>
+      <span>HIIT</span><span class="dot">✦</span>
+      <span>Functional</span><span class="dot">✦</span>
+      <span>Circuit</span><span class="dot">✦</span>
+      <span>Yoga</span><span class="dot">✦</span>
+    </div>
+  </div>
+
+  <div class="section-full">
+    <div class="px-4 sm:px-6 lg:px-10" style="max-width:1400px;margin:0 auto;">
+      <div class="reveal" style="margin-bottom:20px;">
+        <span class="section-label">All Workouts</span>
+        <h2 class="section-title">FIND YOUR <span>CLASS</span></h2>
+      </div>
+
+      <div class="filter-tabs reveal">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="cardio">Cardio</button>
+        <button class="filter-btn" data-filter="resistance">Resistance</button>
+        <button class="filter-btn" data-filter="hybrid">Hybrid</button>
+        <button class="filter-btn" data-filter="recovery">Recovery</button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="class-grid">
+        <div class="class-card filter-card reveal" data-category="cardio">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?w=500&h=300&fit=crop" alt="Cardio Burst"/>
+            <span class="card-tag card-tag-yellow">Cardio</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-high">High</span>
+            </div>
+            <h3>Cardio Burst</h3>
+            <p>High-octane cardio that pushes your heart rate to the max. Expect running, jumping, and explosive movements.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal reveal-delay-1" data-category="cardio">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1520877880798-5ee004e3f11e?w=500&h=300&fit=crop" alt="Cycle"/>
+            <span class="card-tag card-tag-yellow">Cardio</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-high">High</span>
+            </div>
+            <h3>Cycle Storm</h3>
+            <p>Indoor cycling with music-driven intervals. Build aerobic capacity and lower body power in every session.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal reveal-delay-2" data-category="resistance">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1574680096145-d05b474e2155?w=500&h=300&fit=crop" alt="Iron Strength"/>
+            <span class="card-tag card-tag-red">Resistance</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-medium">Medium</span>
+            </div>
+            <h3>Iron Strength</h3>
+            <p>Heavy resistance training using barbells, dumbbells, and machines. Build real muscle, real strength.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal" data-category="resistance">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&h=300&fit=crop" alt="Power Lift"/>
+            <span class="card-tag card-tag-red">Resistance</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-high">High</span>
+            </div>
+            <h3>Power Lift</h3>
+            <p>Olympic-style lifting focused on compound movements. Deadlifts, squats, bench press, and overhead press.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal reveal-delay-1" data-category="hybrid">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=500&h=300&fit=crop" alt="Hybrid Burn"/>
+            <span class="card-tag card-tag-white">Hybrid</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-high">High</span>
+            </div>
+            <h3>Hybrid Burn</h3>
+            <p>The ultimate combination. Cardio and resistance training fused together for full-body transformation.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal reveal-delay-2" data-category="hybrid">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1623874514711-0f321325f318?w=500&h=300&fit=crop" alt="Athletic"/>
+            <span class="card-tag card-tag-white">Hybrid</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-medium">Medium</span>
+            </div>
+            <h3>Athletic Edge</h3>
+            <p>Sport-specific training for agility, speed, and power. Train like a professional athlete every session.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal" data-category="recovery">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=500&h=300&fit=crop" alt="Active Recovery"/>
+            <span class="card-tag card-tag-yellow">Recovery</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-low">Low</span>
+            </div>
+            <h3>Active Recovery</h3>
+            <p>Guided mobility work, deep stretching and yoga to restore muscles, reduce soreness and improve flexibility.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal reveal-delay-1" data-category="recovery">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=500&h=300&fit=crop" alt="Yoga Flow"/>
+            <span class="card-tag card-tag-yellow">Recovery</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-low">Low</span>
+            </div>
+            <h3>Yoga Flow</h3>
+            <p>Mindful yoga sequences designed for athletes. Build balance, core strength, and mental clarity.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+
+        <div class="class-card filter-card reveal reveal-delay-2" data-category="hybrid">
+          <div class="class-card-img">
+            <img src="https://images.unsplash.com/photo-1526506118085-60ce8714f8c5?w=500&h=300&fit=crop" alt="Beast Mode"/>
+            <span class="card-tag card-tag-red">Hybrid</span>
+          </div>
+          <div class="class-info">
+            <div class="class-meta">
+              <span><strong>45</strong> MIN</span>
+              <span>·</span>
+              <span class="intensity-badge intensity-high">High</span>
+            </div>
+            <h3>Beast Mode</h3>
+            <p>Our most intense class. Not for the faint-hearted. Push every boundary and discover what you're made of.</p>
+            <a href="membership.html" class="btn btn-yellow" style="padding:10px 22px;font-size:12px;">Book Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-full" style="background:var(--dark);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="px-4 sm:px-6 lg:px-10" style="max-width:1400px;margin:0 auto;">
+      <div class="reveal" style="margin-bottom:40px;">
+        <span class="section-label">Timetable</span>
+        <h2 class="section-title">WEEKLY <span>SCHEDULE</span></h2>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;" class="reveal">
+        <table class="schedule-table" id="schedule-body">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Class</th>
+              <th>Trainer</th>
+              <th>Duration</th>
+              <th>Intensity</th>
+              <th>Spots</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--yellow);font-weight:700;">06:00 AM</td>
+              <td><strong>Cardio Burst</strong></td>
+              <td style="color:var(--muted);">Coach Alex</td>
+              <td style="color:var(--muted);">45 min</td>
+              <td><span class="intensity-badge intensity-high">High</span></td>
+              <td style="color:var(--muted);">12 / 20</td>
+              <td><button class="btn btn-yellow book-btn" data-class="Cardio Burst" data-time="06:00 AM" style="padding:8px 18px;font-size:11px;">Book</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--yellow);font-weight:700;">07:30 AM</td>
+              <td><strong>Iron Strength</strong></td>
+              <td style="color:var(--muted);">Coach Mia</td>
+              <td style="color:var(--muted);">45 min</td>
+              <td><span class="intensity-badge intensity-medium">Medium</span></td>
+              <td style="color:var(--muted);">8 / 15</td>
+              <td><button class="btn btn-yellow book-btn" data-class="Iron Strength" data-time="07:30 AM" style="padding:8px 18px;font-size:11px;">Book</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--yellow);font-weight:700;">09:00 AM</td>
+              <td><strong>Yoga Flow</strong></td>
+              <td style="color:var(--muted);">Coach Sara</td>
+              <td style="color:var(--muted);">45 min</td>
+              <td><span class="intensity-badge intensity-low">Low</span></td>
+              <td style="color:var(--muted);">5 / 12</td>
+              <td><button class="btn btn-yellow book-btn" data-class="Yoga Flow" data-time="09:00 AM" style="padding:8px 18px;font-size:11px;">Book</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--yellow);font-weight:700;">12:00 PM</td>
+              <td><strong>Hybrid Burn</strong></td>
+              <td style="color:var(--muted);">Coach Jordan</td>
+              <td style="color:var(--muted);">45 min</td>
+              <td><span class="intensity-badge intensity-high">High</span></td>
+              <td style="color:var(--muted);">2 / 20</td>
+              <td><button class="btn btn-yellow book-btn" data-class="Hybrid Burn" data-time="12:00 PM" style="padding:8px 18px;font-size:11px;">Book</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--yellow);font-weight:700;">05:30 PM</td>
+              <td><strong>Beast Mode</strong></td>
+              <td style="color:var(--muted);">Coach Kai</td>
+              <td style="color:var(--muted);">45 min</td>
+              <td><span class="intensity-badge intensity-high">High</span></td>
+              <td style="color:var(--muted);">15 / 20</td>
+              <td><button class="btn btn-yellow book-btn" data-class="Beast Mode" data-time="05:30 PM" style="padding:8px 18px;font-size:11px;">Book</button></td>
+            </tr>
+            <tr>
+              <td style="color:var(--yellow);font-weight:700;">07:00 PM</td>
+              <td><strong>Active Recovery</strong></td>
+              <td style="color:var(--muted);">Coach Sara</td>
+              <td style="color:var(--muted);">45 min</td>
+              <td><span class="intensity-badge intensity-low">Low</span></td>
+              <td style="color:var(--muted);">10 / 15</td>
+              <td><button class="btn btn-yellow book-btn" data-class="Active Recovery" data-time="07:00 PM" style="padding:8px 18px;font-size:11px;">Book</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="newsletter-section reveal">
+    <h2>READY TO <span>START?</span></h2>
+    <p>Get your first class free. No commitment required.</p>
+    <div style="margin-top:28px;">
+      <a href="membership.html" class="btn btn-yellow btn-arrow" style="font-size:15px;padding:16px 40px;">Start Free Trial</a>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand reveal">
+        <a href="index.html" style="text-decoration:none; color:inherit;"><h3>EAST <span>BLUE</span></h3></a>
+        <p>Redefining fitness through high-performance training and elite community experiences. Join the movement today.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social-btn" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-mailing reveal reveal-delay-1">
+        <h4>Membership</h4>
+        <h3>Unlock <span>Access</span></h3>
+        <p>Be the first to know about special offers, new workouts & upcoming events.</p>
+        <a href="membership.html" class="btn btn-yellow" style="padding:12px 24px; font-size:11px;">Join The Elite</a>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-2">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="classes.html">Classes</a></li>
+          <li><a href="activity.html">Activity</a></li>
+          <li><a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-3">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="support.html#faq">Help Center</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="support.html#privacy">Privacy Policy</a></li>
+          <li><a href="support.html#terms">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 East Blue Gym. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="support.html#terms">Terms & Disclosures</a>
+        <a href="support.html#privacy">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. UI FILTERING LOGIC
+      const filterBtns = document.querySelectorAll('.filter-btn');
+      const classCards = document.querySelectorAll('.filter-card');
+
+      filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          filterBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const filter = btn.dataset.filter;
+          
+          classCards.forEach(card => {
+            if (filter === 'all' || card.dataset.category === filter) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // 2. BACKEND API: FETCH LIVE SCHEDULE (Node.js GET Request)
+      async function updateSchedule() {
+        try {
+          const response = await fetch('/api/schedule'); 
+          if (!response.ok) return;
+          const data = await response.json();
+          // Logic to rebuild schedule-body rows would go here
+        } catch (err) {
+          console.warn("Backend not connected yet. Using static schedule.");
+        }
+      }
+      updateSchedule();
+
+      // 3. BACKEND API: BOOKING LOGIC (Node.js POST Request)
+      const bookBtns = document.querySelectorAll('.book-btn');
+      bookBtns.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          const className = btn.dataset.class;
+          const classTime = btn.dataset.time;
+
+          // Replace with real Auth check from your Node/Express Session/JWT
+          const token = localStorage.getItem('token'); 
+          
+          if (!token) {
+            alert("Please Sign In first to book a class!");
+            window.location.href = "membership.html";
+            return;
+          }
+
+          try {
+            const res = await fetch('/api/classes/book', {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ className, classTime })
+            });
+
+            const result = await res.json();
+            if (res.ok) {
+              alert(`Success! You are booked for ${className}.`);
+              btn.innerText = "Booked";
+              btn.classList.replace('btn-yellow', 'btn-nav-outline');
+              btn.disabled = true;
+            } else {
+              alert(result.message || "Booking failed.");
+            }
+          } catch (err) {
+            console.error("Connection error:", err);
+            alert("Unable to reach the server.");
+          }
+        });
+      });
+    });
+  </script>
+
+  <script src="js/script.js?v=2026"></script>
+  <link rel="stylesheet" href="css/chatbot.css">
+  <script src="js/chatbot.js"></script>
+</body>
+</html> 
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Company Hub | East Blue Gym</title>
+  <link rel="stylesheet" href="css/style.css?v=2026"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind = { config: { corePlugins: { preflight: false } } };
+  </script>
+  <style>
+    .company-nav-link {
+      display: block;
+      padding: 12px 20px;
+      color: #888;
+      border-left: 2px solid transparent;
+      font-family: var(--font-sub);
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+    .company-nav-link:hover, .company-nav-link.active {
+      color: var(--yellow);
+      border-left-color: var(--yellow);
+      background: rgba(245, 230, 66, 0.05);
+    }
+    .company-section {
+      padding-top: 100px;
+      margin-top: -100px;
+    }
+  </style>
+</head>
+<body class="bg-[#080808] text-white">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">EAST <span>BLUE</span></a>
+
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="classes.html">Classes</a>
+      <a href="activity.html">Activity</a>
+      <a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a>
+      <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+      <a href="membership.html">Membership</a>
+      <a href="about.html">About</a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="membership.html" class="btn-nav btn-nav-outline nav-auth-only">Sign In</a>
+      <a href="membership.html" class="btn-nav btn-nav-fill nav-auth-only">Start Free Trial</a>
+      
+      <div id="navProfileBtn" class="nav-profile-link nav-dashboard-link hidden" style="display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;">
+        <span id="nav-greeting" class="text-xs font-bold text-yellow-400 hidden lg:inline">Elite Member</span>
+        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow); object-fit: cover;">
+        
+        <div id="navDropdown" class="nav-dropdown">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Settings</a>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <button class="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  
+
+  <!-- GLOBAL AUTH MODAL -->
+  <div id="authModal" class="modal-overlay hidden">
+    <div class="modal-content glass auth-modal-inner">
+      <button class="modal-close" id="closeAuthModal">&times;</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="loginFormModal" class="auth-form active ajax-form" action="/api/auth/login" method="POST">
+        <h2 class="modal-title">WELCOME <span>BACK</span></h2>
+        <p class="modal-subtitle">Enter your elite credentials to continue.</p>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Sign In</button>
+        <p class="auth-switch-text">Don't have an account? <a href="#" onclick="switchTab('register')">Join the Elite</a></p>
+      </form>
+
+      <!-- Register Form -->
+      <form id="registerFormModal" class="auth-form ajax-form" action="/api/auth/register" method="POST">
+        <h2 class="modal-title">START <span>A TRIAL</span></h2>
+        <p class="modal-subtitle">Join the East Blue community today.</p>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" name="firstName" class="form-input" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Create Account</button>
+        <p class="auth-switch-text">Already a member? <a href="#" onclick="switchTab('login')">Sign In</a></p>
+      </form>
+    </div>
+  </div>
+
+  
+
+  <div class="page-hero flex-center" style="background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1543807535-eceef0bc6599?w=1600&fit=crop'); background-size: cover; background-position: center;">
+    <div class="text-center">
+      <h1 class="hero-title">COMPANY <span>HUB</span></h1>
+      <div class="divider mx-auto"></div>
+      <p class="text-[#888] mt-4 max-w-md mx-auto">Explore our mission, news, franchise opportunities, and investment potential.</p>
+    </div>
+  </div>
+
+  <div class="section-full">
+    <div class="px-4 sm:px-6 lg:px-10 max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-16">
+      
+      <!-- STICKY SIDE NAV -->
+      <aside class="hidden lg:block">
+        <div class="sticky top-[120px] flex flex-col gap-2">
+          <a href="#careers" class="company-nav-link active">Careers</a>
+          <a href="#newsroom" class="company-nav-link">Newsroom</a>
+          <a href="#franchise" class="company-nav-link">Franchise</a>
+          <a href="#invest" class="company-nav-link">Invest</a>
+          <a href="about.html" class="company-nav-link">Our Story</a>
+        </div>
+      </aside>
+
+      <!-- CONTENT -->
+      <div class="flex flex-col gap-32">
+        
+        <!-- CAREERS SECTION -->
+        <section id="careers" class="company-section">
+          <span class="section-label">Join The Movement</span>
+          <h2 class="section-title-sm mb-10">CAREERS <span>AT EAST BLUE</span></h2>
+          <p class="text-[#888] mb-12 leading-relaxed">We are always looking for passionate trainers, coaches, and fitness enthusiasts to join our global mission. Build your future with us.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-[#111] p-8 border border-[#222] rounded-lg">
+              <h3 class="text-xl font-bold text-yellow-400 mb-2">Personal Trainer</h3>
+              <p class="text-[#888] mb-4 text-sm">Lead 1-on-1 sessions and help members reach their specific goals with custom programming.</p>
+              <a href="#" class="btn btn-outline-white" style="padding:10px 20px; font-size:11px;">Apply Now</a>
+            </div>
+            <div class="bg-[#111] p-8 border border-[#222] rounded-lg">
+              <h3 class="text-xl font-bold text-yellow-400 mb-2">Group Fitness Coach</h3>
+              <p class="text-[#888] mb-4 text-sm">Bring the energy to our high-intensity group classes and motivate our community.</p>
+              <a href="#" class="btn btn-outline-white" style="padding:10px 20px; font-size:11px;">Apply Now</a>
+            </div>
+            <div class="bg-[#111] p-8 border border-[#222] rounded-lg">
+              <h3 class="text-xl font-bold text-yellow-400 mb-2">Studio Manager</h3>
+              <p class="text-[#888] mb-4 text-sm">Oversee daily operations and ensure our members have the best experience possible.</p>
+              <a href="#" class="btn btn-outline-white" style="padding:10px 20px; font-size:11px;">Apply Now</a>
+            </div>
+            <div class="bg-[#111] p-8 border border-[#222] rounded-lg">
+              <h3 class="text-xl font-bold text-yellow-400 mb-2">Nutritionist</h3>
+              <p class="text-[#888] mb-4 text-sm">Work with members to create sustainable meal plans and healthy lifestyle habits.</p>
+              <a href="#" class="btn btn-outline-white" style="padding:10px 20px; font-size:11px;">Apply Now</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- NEWSROOM SECTION -->
+        <section id="newsroom" class="company-section">
+          <span class="section-label">Latest Updates</span>
+          <h2 class="section-title-sm mb-10">NEWS<span>ROOM</span></h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-[#111] border border-[#222] rounded-lg overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600&fit=crop" class="w-full h-40 object-cover" alt="News"/>
+              <div class="p-6">
+                <span class="text-yellow-400 text-[10px] font-bold uppercase tracking-widest">Event</span>
+                <h3 class="text-base font-bold text-white mt-2">Annual Beach Workout 2024</h3>
+                <p class="text-[#888] mt-2 text-xs">Join us for our biggest event of the year at Blue Coast Beach this summer.</p>
+              </div>
+            </div>
+            <div class="bg-[#111] border border-[#222] rounded-lg overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1594882645126-14020914d58d?w=600&fit=crop" class="w-full h-40 object-cover" alt="News"/>
+              <div class="p-6">
+                <span class="text-yellow-400 text-[10px] font-bold uppercase tracking-widest">New Class</span>
+                <h3 class="text-base font-bold text-white mt-2">Introducing Iron Strength</h3>
+                <p class="text-[#888] mt-2 text-xs">Our new heavy-lifting class designed to build maximum power and muscle mass.</p>
+              </div>
+            </div>
+            <div class="bg-[#111] border border-[#222] rounded-lg overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&fit=crop" class="w-full h-40 object-cover" alt="News"/>
+              <div class="p-6">
+                <span class="text-yellow-400 text-[10px] font-bold uppercase tracking-widest">Community</span>
+                <h3 class="text-base font-bold text-white mt-2">Member of the Month: Sarah</h3>
+                <p class="text-[#888] mt-2 text-xs">How Sarah transformed her life through dedicated training at East Blue.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- FRANCHISE SECTION -->
+        <section id="franchise" class="company-section">
+          <span class="section-label">Business Opportunities</span>
+          <h2 class="section-title-sm mb-10">OWN A <span>FRANCHISE</span></h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-[#111] p-6 border border-[#222] rounded-lg text-center">
+              <h3 class="text-3xl font-bold text-yellow-400 mb-1">50+</h3>
+              <p class="text-white text-[10px] font-bold uppercase tracking-widest">Studios</p>
+            </div>
+            <div class="bg-[#111] p-6 border border-[#222] rounded-lg text-center">
+              <h3 class="text-3xl font-bold text-yellow-400 mb-1">20k+</h3>
+              <p class="text-white text-[10px] font-bold uppercase tracking-widest">Members</p>
+            </div>
+            <div class="bg-[#111] p-6 border border-[#222] rounded-lg text-center">
+              <h3 class="text-3xl font-bold text-yellow-400 mb-1">12</h3>
+              <p class="text-white text-[10px] font-bold uppercase tracking-widest">Countries</p>
+            </div>
+          </div>
+          <div class="bg-yellow-400 text-black p-10 rounded-lg flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <h2 class="text-2xl font-bold uppercase italic leading-tight">Ready to start your<br/>own studio?</h2>
+              <p class="text-black/70 mt-2 text-sm">Download our franchise information pack today.</p>
+            </div>
+            <a href="#" class="btn" style="background:black; color:white; border-color:black;">Download PDF</a>
+          </div>
+        </section>
+
+        <!-- INVEST SECTION -->
+        <section id="invest" class="company-section">
+          <span class="section-label">Partnership</span>
+          <h2 class="section-title-sm mb-10">INVEST IN <span>FUTURE</span></h2>
+          <div class="bg-[#111] p-10 border border-[#222] rounded-lg">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <div>
+                <h3 class="text-xl font-bold text-white mb-4 uppercase italic">Investor Overview</h3>
+                <p class="text-[#888] mb-6 text-sm leading-relaxed">We are currently looking for strategic partners to fuel our international expansion into 20 new markets by 2026.</p>
+                <ul class="flex flex-col gap-3 text-xs text-[#ccc]">
+                  <li>• Consistent 15% year-over-year growth</li>
+                  <li>• Industry-leading retention rates (85%+)</li>
+                  <li>• Modular studio design for rapid deployment</li>
+                </ul>
+              </div>
+              <div>
+                <h4 class="text-yellow-400 font-bold mb-4 uppercase text-sm">Request Pitch Deck</h4>
+                <form class="ajax-form flex flex-col gap-4" action="/api/invest" method="POST">
+                  <input type="email" name="email" style="background:#222; border:1px solid #333; padding:12px; border-radius:4px; font-size:13px; color:white;" placeholder="Professional Email" required/>
+                  <button type="submit" class="btn btn-yellow w-full justify-center">Submit Request</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="newsletter-section reveal">
+    <span class="section-label">Collaborate</span>
+    <h2>WANT TO <span>WORK</span> TOGETHER?</h2>
+    <p>We are always open to new partnerships and creative collaborations.</p>
+    <a href="contact.html" class="btn btn-outline-white mt-8">Get In Touch</a>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand reveal">
+        <a href="index.html" style="text-decoration:none; color:inherit;"><h3>EAST <span>BLUE</span></h3></a>
+        <p>Redefining fitness through high-performance training and elite community experiences. Join the movement today.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social-btn" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+          <a href="#" class="footer-social-btn" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+        </div>
+      </div>
+
+      <div class="footer-mailing reveal reveal-delay-1">
+        <h4>Membership</h4>
+        <h3>Unlock <span>Access</span></h3>
+        <p>Be the first to know about special offers, new workouts & upcoming events.</p>
+        <a href="membership.html" class="btn btn-yellow" style="padding:12px 24px; font-size:11px;">Join The Elite</a>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-2">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="classes.html">Classes</a></li>
+          <li><a href="activity.html">Activity</a></li>
+          <li><a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col reveal reveal-delay-3">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="support.html#faq">Help Center</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="support.html#privacy">Privacy Policy</a></li>
+          <li><a href="support.html#terms">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2026 East Blue Gym. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="support.html#terms">Terms & Disclosures</a>
+        <a href="support.html#privacy">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/script.js?v=2026"></script>
+  <script>
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.company-section');
+      const navLinks = document.querySelectorAll('.company-nav-link');
+      
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 150) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href').includes(current)) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+  <link rel="stylesheet" href="css/chatbot.css">
+  <script src="js/chatbot.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
