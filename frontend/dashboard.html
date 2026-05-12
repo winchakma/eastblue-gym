@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Member Dashboard | East Blue Gym</title>
+  <title>Member HUD | East Blue Gym</title>
   <link rel="stylesheet" href="css/style.css?v=2026"/>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -13,34 +13,67 @@
     .dash-card {
       background: #111;
       border: 1px solid #222;
-      border-radius: 12px;
+      border-radius: 16px;
       padding: 24px;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .dash-card:hover {
       border-color: var(--yellow);
       background: #151515;
+      transform: translateY(-4px);
     }
-    .tier-badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+
+    /* Circular Progress */
+    .circular-progress {
+      position: relative;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: conic-gradient(var(--yellow) calc(var(--progress) * 1%), #222 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .tier-elite { background: var(--yellow); color: black; }
-    .tier-pro { background: #333; color: white; }
-    .progress-bar {
-      height: 6px;
-      background: #222;
-      border-radius: 3px;
-      overflow: hidden;
+    .circular-progress::after {
+      content: attr(data-value);
+      position: absolute;
+      width: 100px; height: 100px;
+      background: #111;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-head);
+      font-size: 24px;
+      color: var(--yellow);
     }
-    .progress-fill {
-      height: 100%;
-      background: var(--yellow);
-      width: 65%;
+
+    /* Achievement Badges */
+    .badge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 16px;
+    }
+    .badge-item {
+      aspect-ratio: 1;
+      background: #1a1a1a;
+      border-radius: 12px;
+      border: 1px solid #2a2a2a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .badge-item:hover {
+      border-color: var(--yellow);
+      background: rgba(245, 230, 66, 0.1);
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 0 20px rgba(245, 230, 66, 0.2);
+    }
+    .badge-locked {
+      opacity: 0.3;
+      filter: grayscale(1);
     }
   </style>
 </head>
@@ -49,406 +82,127 @@
   <!-- NAVBAR -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">EAST <span>BLUE</span></a>
-
     <div class="nav-links">
       <a href="index.html">Home</a>
       <a href="classes.html">Classes</a>
       <a href="activity.html">Activity</a>
-      <a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a>
-      <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
+      <a href="dashboard.html" class="active">Dashboard</a>
       <a href="membership.html">Membership</a>
-      <a href="about.html">About</a>
     </div>
-
     <div class="nav-actions">
-      <a href="membership.html" class="btn-nav btn-nav-outline nav-auth-only">Sign In</a>
-      <a href="membership.html" class="btn-nav btn-nav-fill nav-auth-only">Start Free Trial</a>
-      
-      <div id="navProfileBtn" class="nav-profile-link nav-dashboard-link hidden" style="display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative;">
-        <span id="nav-greeting" class="text-xs font-bold text-yellow-400 hidden lg:inline">Elite Member</span>
-        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow); object-fit: cover;">
-        
-        <div id="navDropdown" class="nav-dropdown">
-            <a href="dashboard.html">Dashboard</a>
-            <a href="profile.html">Settings</a>
-            <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;">
-            <a href="#" onclick="logout()">Logout</a>
-        </div>
+      <div id="navProfileBtn" class="nav-profile-link" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+        <img id="nav-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" style="width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--yellow);">
       </div>
     </div>
-
-    <button class="hamburger" type="button" aria-label="Open menu" aria-controls="mobile-menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
   </nav>
 
-  
-
-  <!-- GLOBAL AUTH MODAL -->
-  <div id="authModal" class="modal-overlay hidden">
-    <div class="modal-content glass auth-modal-inner">
-      <button class="modal-close" id="closeAuthModal">&times;</button>
-      
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchTab('login')">Sign In</button>
-        <button class="auth-tab" onclick="switchTab('register')">Register</button>
-      </div>
-
-      <!-- Login Form -->
-      <form id="loginFormModal" class="auth-form active ajax-form" action="/api/auth/login" method="POST">
-        <h2 class="modal-title">WELCOME <span>BACK</span></h2>
-        <p class="modal-subtitle">Enter your elite credentials to continue.</p>
-        
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Sign In</button>
-        <p class="auth-switch-text">Don't have an account? <a href="#" onclick="switchTab('register')">Join the Elite</a></p>
-      </form>
-
-      <!-- Register Form -->
-      <form id="registerFormModal" class="auth-form ajax-form" action="/api/auth/register" method="POST">
-        <h2 class="modal-title">START <span>A TRIAL</span></h2>
-        <p class="modal-subtitle">Join the East Blue community today.</p>
-        
-        <div class="grid grid-cols-2 gap-4">
-          <div class="form-group">
-            <label class="form-label">First Name</label>
-            <input type="text" name="firstName" class="form-input" placeholder="John" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Last Name</label>
-            <input type="text" name="lastName" class="form-input" placeholder="Doe" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email Address</label>
-          <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" name="password" class="form-input" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn btn-yellow w-full justify-center mt-4">Create Account</button>
-        <p class="auth-switch-text">Already a member? <a href="#" onclick="switchTab('login')">Sign In</a></p>
-      </form>
-    </div>
-  </div>
-
-  
-  <div class="mobile-menu" id="mobile-menu">
-    <a href="index.html">Home</a>
-    <a href="classes.html">Classes</a>
-    <a href="activity.html">Activity</a>
-    <a href="dashboard.html" class="nav-dashboard-link active">Dashboard</a>
-    <a href="challenge.html" class="nav-dashboard-link hidden">Challenge</a>
-    <a href="membership.html">Membership</a>
-    <a href="about.html">About</a>
-  </div>
-
-  <div class="page-hero" style="height: 40vh; min-height: 300px; background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1600&fit=crop'); background-size: cover; background-position: center;">
+  <!-- DASHBOARD HEADER -->
+  <div class="page-hero" style="height: 35vh; min-height: 250px;">
     <div class="page-hero-content">
       <span class="hero-tag">Member Portal</span>
-      <h1 class="hero-title">DASH<span>BOARD</span></h1>
+      <h1 class="hero-title">PERFORMANCE <span>HUD</span></h1>
     </div>
   </div>
 
-  <div class="section-full" style="margin-top: -80px; position: relative; z-index: 10;">
+  <div class="section-full" style="margin-top: -60px; position: relative; z-index: 10;">
     <div class="px-4 sm:px-6 lg:px-10 max-w-[1400px] mx-auto">
       
-      <!-- TOP STATS -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div class="dash-card">
-          <div class="flex justify-between items-start mb-4">
-            <span class="text-xs text-[#555] uppercase font-bold tracking-widest">Active Plan</span>
-            <span class="tier-badge tier-elite" id="membership-type">Elite</span>
-          </div>
-          <h3 class="text-2xl font-bold mb-1">East Blue Elite</h3>
-          <p class="text-xs text-[#888]">Renews in 12 days</p>
-        </div>
-        <div class="dash-card">
-          <span class="text-xs text-[#555] uppercase font-bold tracking-widest mb-4 block">BMR Estimation</span>
-          <h3 class="text-2xl font-bold mb-1" id="bmr-value" style="cursor:pointer;" title="Click to learn more">1,850 <span class="text-sm font-normal text-[#555]">kcal</span></h3>
-          <p class="text-xs text-[#888]">Calculated by AI Assistant</p>
-        </div>
-        <div class="dash-card">
-          <span class="text-xs text-[#555] uppercase font-bold tracking-widest mb-4 block">Workouts Done</span>
-          <h3 class="text-2xl font-bold mb-1">24 <span class="text-sm font-normal text-[#555]">Sessions</span></h3>
-          <div class="progress-bar mt-2">
-            <div class="progress-fill"></div>
+      <!-- PERFORMANCE RINGS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div class="dash-card flex items-center gap-8">
+          <div class="circular-progress" style="--progress: 75" data-value="75%"></div>
+          <div>
+            <h4 class="text-xs text-[#555] font-bold uppercase tracking-widest mb-1">Weekly Goals</h4>
+            <h3 class="text-2xl font-bold">In-Progress</h3>
+            <p class="text-[10px] text-yellow-400 mt-1">15 sessions this month</p>
           </div>
         </div>
-        <div class="dash-card">
-          <span class="text-xs text-[#555] uppercase font-bold tracking-widest mb-4 block">Daily Goal</span>
-          <h3 class="text-2xl font-bold mb-1">65% <span class="text-sm font-normal text-[#555]">Complete</span></h3>
-          <p class="text-xs text-yellow-400 mt-1"><button id="btnKeepPushing" class="text-xs text-yellow-400 mt-1 hover:underline">Keep pushing!</button>
+        <div class="dash-card flex items-center gap-8">
+          <div class="circular-progress" style="--progress: 40" data-value="40%"></div>
+          <div>
+            <h4 class="text-xs text-[#555] font-bold uppercase tracking-widest mb-1">Calorie Target</h4>
+            <h3 class="text-2xl font-bold">12,500 <span class="text-sm font-normal">kcal</span></h3>
+            <p class="text-[10px] text-[#555] mt-1">Keep burning elite!</p>
+          </div>
+        </div>
+        <div class="dash-card flex items-center gap-8">
+          <div class="circular-progress" style="--progress: 92" data-value="92%"></div>
+          <div>
+            <h4 class="text-xs text-[#555] font-bold uppercase tracking-widest mb-1">Streak Status</h4>
+            <h3 class="text-2xl font-bold">14 Days</h3>
+            <p class="text-[10px] text-green-500 mt-1">Master level consistency</p>
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <!-- MAIN CONTENT -->
-        <div class="lg:col-span-2 flex flex-col gap-12">
-          
+        <!-- LEFT: UPCOMING & RECENT -->
+        <div class="lg:col-span-2 flex flex-col gap-8">
           <div class="dash-card">
-            <h2 class="section-title-sm mb-8" style="font-size: 28px;">UPCOMING <span>CLASSES</span></h2>
+            <h3 class="text-lg font-bold mb-6 italic uppercase">Upcoming Sessions</h3>
             <div class="flex flex-col gap-4">
-              <div class="flex items-center justify-between p-4 bg-[#181818] rounded-lg border-l-4 border-yellow-400">
+              <div class="p-4 bg-[#0d0d0d] border-l-4 border-yellow-400 rounded-lg flex justify-between items-center">
                 <div>
-                  <h4 class="font-bold">Cardio Burst</h4>
-                  <p class="text-xs text-[#555]">Today at 06:00 PM • Coach Alex</p>
+                  <div class="text-xs text-yellow-400 font-bold mb-1">TODAY • 06:00 PM</div>
+                  <h4 class="font-bold uppercase tracking-wider">Cardio Burst</h4>
                 </div>
-                <button class="btn-nav btn-nav-fill" style="padding: 6px 14px; font-size: 10px;" id="btnCheckIn">Check In</button>
-              </div>
-              <div class="flex items-center justify-between p-4 bg-[#181818] rounded-lg">
-                <div>
-                  <h4 class="font-bold">Iron Strength</h4>
-                  <p class="text-xs text-[#555]">Tomorrow at 09:00 AM • Coach Mia</p>
-                </div>
-                <button class="btn-nav btn-nav-outline" style="padding: 6px 14px; font-size: 10px;" id="btnCancel">Cancel</button>
+                <button class="btn btn-yellow" style="padding: 8px 16px; font-size: 10px;">Check In</button>
               </div>
             </div>
-            <a href="classes.html" class="text-yellow-400 text-xs font-bold uppercase mt-6 inline-block tracking-widest">+ Book New Class</a>
           </div>
 
           <div class="dash-card">
-            <h2 class="section-title-sm mb-8" style="font-size: 28px;">REWARDS <span>HUB</span></h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="p-6 border border-[#222] rounded-lg text-center ">
-                <div class="text-3xl mb-2">🏆</div>
-                <h4 class="font-bold text-sm">30-Day Streak</h4><button id="btnStreak" class="text-[10px] text-yellow-400 font-bold uppercase tracking-widest mt-2 hover:underline">View Progress</button>
-                <p class="text-[10px] text-[#555] mt-1">Unlock 1 Free Personal Training Session</p>
-              </div>
-              <div class="p-6 border border-[#222] rounded-lg text-center bg-yellow-400/5 border-yellow-400/20">
-                <div class="text-3xl mb-2">🥤</div>
-                <h4 class="font-bold text-sm">Protein Perk</h4>
-                <p class="text-[10px] text-yellow-400 mt-1"><button id="btnClaimPerk" class="text-[10px] text-yellow-400 font-bold uppercase tracking-widest mt-2 hover:underline">Claim Now</button></p>
-              </div>
+            <h3 class="text-lg font-bold mb-6 italic uppercase">Trophy Cabinet</h3>
+            <div class="badge-grid">
+              <div class="badge-item" title="First Class Done!">🔥</div>
+              <div class="badge-item" title="Week 1 Streak">📅</div>
+              <div class="badge-item" title="Morning Warrior">☀️</div>
+              <div class="badge-item badge-locked" title="Century Club (100 Sessions)">💯</div>
+              <div class="badge-item badge-locked" title="Early Bird">🦅</div>
+              <div class="badge-item badge-locked" title="Iron Master">🏋️</div>
             </div>
           </div>
-
         </div>
 
-                        <!-- SIDEBAR -->
-        <div class="flex flex-col gap-12">
-          
+        <!-- RIGHT: STATS & BMR -->
+        <div class="flex flex-col gap-8">
           <div class="dash-card">
-            <div class="flex flex-col items-center mb-6">
-              <div class="w-24 h-24 rounded-full border-2 border-yellow-400 p-1 mb-4">
-                <img id="sidebar-avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Profile" class="w-full h-full rounded-full object-cover">
+            <h3 class="text-lg font-bold mb-6 italic uppercase">Body Stats</h3>
+            <div class="flex flex-col gap-5">
+              <div class="flex justify-between border-b border-[#222] pb-3">
+                <span class="text-[#555] text-xs font-bold uppercase">Estimated BMR</span>
+                <span class="text-yellow-400 font-bold">1,850 kcal</span>
               </div>
-              <h3 id="member-nickname" class="text-xl font-bold italic uppercase">Loading...</h3>
-              <p id="member-bio" class="text-[10px] text-[#555] text-center mt-2 px-4 italic line-clamp-2">Loading elite profile...</p>
+              <div class="flex justify-between border-b border-[#222] pb-3">
+                <span class="text-[#555] text-xs font-bold uppercase">Target Weight</span>
+                <span class="text-white font-bold">78.5 kg</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[#555] text-xs font-bold uppercase">Fat Percentage</span>
+                <span class="text-white font-bold">14.2%</span>
+              </div>
             </div>
-            <div class="flex flex-col gap-4 text-sm">
-              <div class="flex justify-between border-b border-[#222] pb-2">
-                <span class="text-[#555]">Email</span>
-                <span id="member-email" class="text-[11px]">...</span>
-              </div>
-              <div class="flex justify-between border-b border-[#222] pb-2">
-                <span class="text-[#555]">Member Since</span>
-                <span id="member-since">...</span>
-              </div>
-              <div class="flex justify-between border-b border-[#222] pb-2">
-                <span class="text-[#555]">Status</span>
-                <span class="text-green-500 font-bold">Active</span>
-              </div>
-              <!-- This button MUST work -->
-              <button id="btnOpenSettings" class="btn btn-outline-white w-full justify-center mt-4" style="font-size: 10px; padding: 10px;">Account Settings</button>
-            </div>
+            <button class="btn btn-outline-white w-full justify-center mt-8" style="font-size: 10px;">Update Stats</button>
           </div>
 
-          <div class="dash-card" style="background: var(--yellow); color: black;">
-            <h3 class="text-lg font-bold mb-4 italic uppercase">Elite Tip</h3>
-            <p class="text-xs font-medium leading-relaxed">Increasing your protein intake by 20g after today's Iron Strength session can improve muscle recovery by up to 30%.</p>
+          <div class="dash-card" style="background: linear-gradient(135deg, #1a1a1a, #0d0d0d);">
+            <h3 class="text-sm font-bold text-yellow-400 mb-2 uppercase">AI Insight</h3>
+            <p class="text-xs text-[#888] leading-relaxed">Your recovery score is lower than usual. We recommend a 20-min Yoga Flow session tomorrow instead of Beast Mode.</p>
           </div>
-
         </div>
 
       </div>
     </div>
   </div>
 
-        <!-- ELITE CONTROL CENTER (MODAL) -->
-  <div id="profileModal" class="fixed inset-0 z-[100] hidden bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="bg-[#0a0a0a] border border-[#222] rounded-3xl w-full max-w-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)]">
-      
-      <!-- Modal Header -->
-      <div class="p-6 border-b border-[#1a1a1a] flex justify-between items-center bg-[#0d0d0d]">
-        <div class="flex items-center gap-3">
-          <div class="w-2 h-8 bg-yellow-400 rounded-full"></div>
-          <h3 class="text-xl font-bold tracking-widest italic uppercase">Elite <span class="text-yellow-400">Control Center</span></h3>
-        </div>
-        <button id="btnCloseModal" class="w-10 h-10 rounded-full bg-[#1a1a1a] flex items-center justify-center text-[#555] hover:text-white hover:bg-red-500/20 transition-all">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-
-      <!-- Control Center Body -->
-      <div class="flex flex-col md:flex-row h-[500px]">
-        
-        <!-- Sidebar Tabs -->
-        <div class="w-full md:w-48 bg-[#0d0d0d] border-r border-[#1a1a1a] p-4 flex flex-row md:flex-col gap-2">
-          <button onclick="switchTab('profile')" class="tab-btn active" data-tab="profile">Profile</button>
-          <button onclick="switchTab('security')" class="tab-btn" data-tab="security">Security</button>
-          <button onclick="switchTab('membership')" class="tab-btn" data-tab="membership">Membership</button>
-        </div>
-
-        <!-- Tab Content -->
-        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
-          
-          <!-- Profile Tab -->
-          <form id="profileUpdateForm" class="tab-content active" data-tab="profile" enctype="multipart/form-data">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="md:col-span-2 flex items-center gap-6 mb-4">
-                <div class="relative group">
-                  <img id="modal-avatar-preview" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="w-20 h-20 rounded-2xl object-cover border border-[#222]">
-                  <label for="edit-avatar-file" class="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
-                    <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                  </label>
-                  <input type="file" name="profilePictureFile" id="edit-avatar-file" class="hidden" accept="image/*">
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-white mb-1">Avatar Image</h4>
-                  <p class="text-[10px] text-[#555]">Upload a high-res selfie (JPG, PNG)</p>
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label text-[10px] text-[#555] uppercase font-bold tracking-widest mb-2 block">Full Name</label>
-                <input type="text" name="username" id="edit-username" class="form-input w-full" placeholder="Full Name">
-              </div>
-              <div class="form-group">
-                <label class="form-label text-[10px] text-[#555] uppercase font-bold tracking-widest mb-2 block">Nickname</label>
-                <input type="text" name="nickname" id="edit-nickname" class="form-input w-full" placeholder="e.g. Iron Marcus">
-              </div>
-              <div class="md:col-span-2">
-                <label class="form-label text-[10px] text-[#555] uppercase font-bold tracking-widest mb-2 block">Profile Bio</label>
-                <textarea name="bio" id="edit-bio" class="form-input w-full h-24 resize-none" placeholder="Share your fitness goals..."></textarea>
-              </div>
-              <div class="md:col-span-2 pt-4">
-                <button type="submit" class="btn btn-yellow w-full justify-center py-4">Save Profile Changes</button>
-              </div>
-            </div>
-          </form>
-
-          <!-- Security Tab -->
-          <div class="tab-content" data-tab="security">
-            <h4 class="text-sm font-bold text-white mb-6 uppercase tracking-widest">Login Credentials</h4>
-            <form id="changeEmailForm" class="flex flex-col gap-4 mb-10">
-              <div class="form-group">
-                <label class="form-label text-[10px] text-[#555] uppercase font-bold tracking-widest mb-2 block">New Email Address</label>
-                <input type="email" name="newEmail" class="form-input w-full" placeholder="new-email@example.com">
-              </div>
-              <button type="submit" class="btn btn-outline-white text-[10px]">Update Email</button>
-            </form>
-            <div class="h-px bg-[#1a1a1a] mb-10"></div>
-            <form id="changePasswordForm" class="flex flex-col gap-4">
-              <div class="form-group">
-                <label class="form-label text-[10px] text-[#555] uppercase font-bold tracking-widest mb-2 block">New Password</label>
-                <input type="password" name="newPassword" class="form-input w-full" placeholder="��������">
-              </div>
-              <button type="submit" class="btn btn-outline-white text-[10px]">Change Password</button>
-            </form>
-          </div>
-
-          <!-- Membership Tab -->
-          <div class="tab-content" data-tab="membership">
-             <div class="bg-[#111] p-6 rounded-2xl border border-[#1a1a1a] mb-6">
-                <div class="flex justify-between items-center mb-4">
-                  <span class="text-[10px] text-yellow-400 uppercase font-bold tracking-widest">Current Plan</span>
-                  <span class="px-2 py-1 bg-yellow-400 text-black text-[9px] font-bold rounded">ACTIVE</span>
-                </div>
-                <h3 id="display-membership-tier" class="text-2xl font-bold italic mb-2">ELITE ANNUAL</h3>
-                <p class="text-xs text-[#555]">Your membership renews on January 2027.</p>
-             </div>
-             <button class="btn btn-outline-white w-full justify-center opacity-50 cursor-not-allowed">Manage Billing (Coming Soon)</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <style>
-    .tab-btn {
-      width: 100%;
-      padding: 12px 16px;
-      text-align: left;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #555;
-      border-radius: 12px;
-      transition: all 0.3s ease;
-    }
-    .tab-btn:hover { color: white; background: #1a1a1a; }
-    .tab-btn.active { color: #000; background: #f5e642; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  </style>
-
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-brand reveal">
-        <a href="index.html" style="text-decoration:none; color:inherit;"><h3>EAST <span>BLUE</span></h3></a>
-        <p>Redefining fitness through high-performance training and elite community experiences. Join the movement today.</p>
-        <div class="footer-socials">
-          <a href="#" class="footer-social-btn" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-          <a href="#" class="footer-social-btn" aria-label="Facebook"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-          <a href="#" class="footer-social-btn" aria-label="Twitter"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
-          <a href="#" class="footer-social-btn" aria-label="LinkedIn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
-        </div>
-      </div>
-
-      <div class="footer-mailing reveal reveal-delay-1">
-        <h4>Membership</h4>
-        <h3>Unlock <span>Access</span></h3>
-        <p>Be the first to know about special offers, new workouts & upcoming events.</p>
-        <a href="membership.html" class="btn btn-yellow" style="padding:12px 24px; font-size:11px;">Join The Elite</a>
-      </div>
-
-      <div class="footer-col reveal reveal-delay-2">
-        <h4>Navigate</h4>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="classes.html">Classes</a></li>
-          <li><a href="activity.html">Activity</a></li>
-          <li><a href="dashboard.html" class="nav-dashboard-link hidden">Dashboard</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col reveal reveal-delay-3">
-        <h4>Support</h4>
-        <ul>
-          <li><a href="support.html#faq">Help Center</a></li>
-          <li><a href="contact.html">Contact Us</a></li>
-          <li><a href="support.html#privacy">Privacy Policy</a></li>
-          <li><a href="support.html#terms">Terms of Service</a></li>
-        </ul>
-      </div>
-    </div>
-
+  <footer class="mt-20">
     <div class="footer-bottom">
       <p>&copy; 2026 East Blue Gym. All rights reserved.</p>
-      <div class="footer-bottom-links">
-        <a href="support.html#terms">Terms & Disclosures</a>
-        <a href="support.html#privacy">Privacy Policy</a>
-      </div>
     </div>
   </footer>
-	<script src="js/script.js?v=2026"></script>
-<link rel="stylesheet" href="css/chatbot.css">
-<script src="js/chatbot.js"></script>
+
+  <script src="js/script.js?v=2026"></script>
+  <script src="js/chatbot.js"></script>
 </body>
 </html>
-
-
-
-
